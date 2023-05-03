@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+
+    environment {
+        registry = "254860472434.dkr.ecr.us-east-1.amazonaws.com/test-ecr-repo:latest"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/master']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/prashantkk99/jenkins-test-1']]])
+            }
+        }
+    
+        stage ("Build image") {
+            steps {
+                script {
+                    docker.build registry
+                }
+            }
+        }
+        
+        stage ("docker push") {
+         steps {
+             script {
+                sh "aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 254860472434.dkr.ecr.us-east-1.amazonaws.com"
+                sh "docker push 254860472434.dkr.ecr.us-east-1.amazonaws.com/test-ecr-repo:latest"
+                 
+             }
+           }   
+        }
+        
+        stage ("Kube Deploy") {
+            steps {
+                withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'K8S', namespace: '', serverUrl: '') {
+                 sh "kubectl apply -f spring-boot-app.yaml.txt"
+                }
+            }
+        }
+    }
+}
