@@ -31,7 +31,7 @@
 	</dependencies>
 
 	<build>
-		 <directory>/opt/jenkins-bild/workspace/pipe/build</directory>
+		 <directory>/opt/jenkins/workspace/pipe/build</directory>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
